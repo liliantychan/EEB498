@@ -136,15 +136,17 @@ nrow(multi.home.site) # There are 27 turtles with more than 1 home sites
 #view(home.sites[home.sites$Notch %in% multi.home.site$Notch,]) # Check their respective home sites
 
 # Add home site into filter.data
-# test <- left_join(filter.data, home.sites,
-#            by = c("Notch" = "Notch"))
+filter.data <- left_join(filter.data, home.sites,
+           by = c("Notch" = "Notch"))
+
+filter.data <- filter.data %>% relocate(home.site, .before = seen)
 
 # -----------------------PART 3: Create encounter history-----------------------
 
 #Create encounter history of each turtle
 JS.data <- filter.data %>%
   pivot_wider(names_from = Year, values_from = seen, values_fill = 0) %>% 
-  unite("ch", 3:tail(names(.),1), sep = "") %>% #put all enounter history into 1 column
+  unite("ch", 4:tail(names(.),1), sep = "") %>% #put all encounter history into 1 column
   relocate(ch, .before = Sex)
 
 
@@ -164,7 +166,7 @@ JS.data$Sex <- as.factor(JS.data$Sex)
 
 # Process data
 JS.processed <- marked::process.data(JS.data, model = "JS", 
-                                     groups = c("Sex","site"),
+                                     groups = c("Sex","home.site"),
                                      begin.time = 1990)
 JS.processed
 
@@ -189,28 +191,28 @@ fit.js.models <- function(){
   p.dot <- list(formula=~1)
   p.time <- list(formula=~time)
   p.sex <- list(formula=~Sex)
-  # p.site <- list(formula=~site)
+  # p.site <- list(formula=~home.site)
   p.days <- list(formula=~num.days)
   p.ppl <- list(formula=~num.researcher)
 
   p.timeplussex <- list(formula=~time+Sex)
-  # p.timeplussite <- list(formula=~time+site)
+  # p.timeplussite <- list(formula=~time+home.site)
   p.timeplusdays <- list(formula=~time+num.days)
   p.timeplusppl <- list(formula=~time+num.researcher)
-  # p.sexplussite <- list(formula=~Sex+site)
+  # p.sexplussite <- list(formula=~Sex+home.site)
   p.sexplusdays <- list(formula=~Sex+num.days)
   p.sexplusppl <- list(formula=~Sex+num.researcher)
-  # p.siteplusdays <- list(formula=~site+num.days)
-  # p.siteplusppl <- list(formula=~site+num.researcher)
+  # p.siteplusdays <- list(formula=~home.site+num.days)
+  # p.siteplusppl <- list(formula=~home.site+num.researcher)
   
-  # p.timeplussexplussite <- list(formula=~time+Sex+site)
+  # p.timeplussexplussite <- list(formula=~time+Sex+home.site)
   p.timeplussexplusdays <- list(formula=~time+Sex+num.days)
   p.timeplussexplusppl <- list(formula=~time+Sex+num.researcher)
-  # p.sexplussiteplusdays <- list(formula=~Sex+site+num.days)
-  # p.sexplussiteplusppl <- list(formula=~Sex+site+num.researcher)
+  # p.sexplussiteplusdays <- list(formula=~Sex+home.site+num.days)
+  # p.sexplussiteplusppl <- list(formula=~Sex+home.site+num.researcher)
   
-  # p.timeplussexplussiteplusdays <- list(formula=~time+Sex+site+num.days)
-  # p.timeplussexplussiteplusppl <- list(formula=~time+Sex+site+num.researcher)
+  # p.timeplussexplussiteplusdays <- list(formula=~time+Sex+home.site+num.days)
+  # p.timeplussexplussiteplusppl <- list(formula=~time+Sex+home.site+num.researcher)
   
   ## Define models for pent (probability of entry)
   # pent estimates MUST SUM to 1 (for each group). This is constained using a Multinomial Logit link
@@ -244,7 +246,7 @@ library(RMark)
 # Extract population density
 # Process data
 js.proc <- RMark::process.data(JS.data, model = "POPAN", 
-                               groups = c("Sex", "site"),
+                               groups = c("Sex", "home.site"),
                                begin.time = 1990)
 
 # Formulae for model
